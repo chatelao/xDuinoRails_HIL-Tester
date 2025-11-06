@@ -186,35 +186,24 @@ jobs:
 
 ## 5. Hardware Connections
 
+![Raspberry Pi GPIO Header](https://www.pi4j.com/1.2/images/p1header.png)
+
 ### 5.1. Raspberry Pi 3 Pinout Proposal
 
-This section proposes a pinout for the Raspberry Pi 3's 40-pin GPIO header to connect the three SUTs (two Raspberry Pi Picos and one STM32F446RE). The goal is to provide a clear and reliable hardware setup for programming, debugging, and communicating with the SUTs. This proposal uses only the first 26 pins of the header, as requested.
+This section proposes a pinout for the Raspberry Pi 3's 26-pin GPIO header to connect the three SUTs (two Raspberry Pi Picos and one STM32F446RE). The goal is to provide a clear and reliable hardware setup for programming, debugging, and communicating with the SUTs.
 
-| Pin # | Name      | GPIO # | Description                  | SUT Connection           |
-|-------|-----------|--------|------------------------------|--------------------------|
-| 1     | 3.3V      | -      | 3.3V Power                   | -                        |
-| 2     | 5V        | -      | 5V Power                     | -                        |
-| 3     | GPIO 2    | 2      | I2C1 SDA                     | -                        |
-| 4     | 5V        | -      | 5V Power                     | -                        |
-| 5     | GPIO 3    | 3      | I2C1 SCL                     | -                        |
-| 6     | GND       | -      | Ground                       | -                        |
-| 7     | GPIO 4    | 4      | Pico 1 SWCLK                 | Pico 1 SWCLK             |
-| 8     | GPIO 14   | 14     | UART TX                      | SUT Result UART RX       |
-| 9     | GND       | -      | Ground                       | -                        |
-| 10    | GPIO 15   | 15     | UART RX                      | SUT Result UART TX       |
-| 11    | GPIO 17   | 17     | Pico 1 SWDIO                 | Pico 1 SWDIO             |
-| 12    | GPIO 18   | 18     | Pico 2 SWCLK                 | Pico 2 SWCLK             |
-| 13    | GPIO 27   | 27     | Pico 2 SWDIO                 | Pico 2 SWDIO             |
-| 14    | GND       | -      | Ground                       | -                        |
-| 15    | GPIO 22   | 22     | STM32F446RE JTAG TCK         | STM32F446RE TCK          |
-| 16    | GPIO 23   | 23     | STM32F446RE JTAG TMS         | STM32F446RE TMS          |
-| 17    | 3.3V      | -      | 3.3V Power                   | -                        |
-| 18    | GPIO 24   | 24     | STM32F446RE JTAG TDO         | STM32F446RE TDO          |
-| 19    | GPIO 10   | 10     | SPI0 MOSI / STM32F446RE TDI  | STM32F446RE TDI          |
-| 20    | GND       | -      | Ground                       | -                        |
-| 21    | GPIO 9    | 9      | SPI0 MISO                    | -                        |
-| 22    | GPIO 25   | 25     | Pico 1 Reset                 | Pico 1 nRST              |
-| 23    | GPIO 11   | 11     | SPI0 SCLK                    | -                        |
-| 24    | GPIO 8    | 8      | SPI0 CE0                     | Pico 2 Reset             |
-| 25    | GND       | -      | Ground                       | -                        |
-| 26    | GPIO 7    | 7      | SPI0 CE1                     | STM32F446RE Reset        |
+| Pin # | Function                       | Function                           | Pin # |
+|-------|--------------------------------|------------------------------------|-------|
+| 1     | 3.3V Power                     | 5V Power                           | 2     |
+| 3     | GPIO 2 (I2C1 SDA)              | 5V Power                           | 4     |
+| 5     | GPIO 3 (I2C1 SCL)              | Ground                             | 6     |
+| 7     | GPIO 4 / Pico 1 SWCLK          | GPIO 14 / SUT Result UART RX       | 8     |
+| 9     | Ground                         | GPIO 15 / SUT Result UART TX       | 10    |
+| 11    | GPIO 17 / Pico 1 SWDIO         | GPIO 18 / Pico 2 SWCLK             | 12    |
+| 13    | GPIO 27 / Pico 2 SWDIO         | Ground                             | 14    |
+| 15    | GPIO 22 / STM32F446RE TCK      | GPIO 23 / STM32F446RE TMS          | 16    |
+| 17    | 3.3V Power                     | GPIO 24 / STM32F446RE TDO          | 18    |
+| 19    | GPIO 10 / STM32F446RE TDI      | Ground                             | 20    |
+| 21    | GPIO 9 (SPI0 MISO)             | GPIO 25 / Pico 1 nRST              | 22    |
+| 23    | GPIO 11 (SPI0 SCLK)            | GPIO 8 / Pico 2 Reset              | 24    |
+| 25    | Ground                         | GPIO 7 / STM32F446RE Reset         | 26    |
