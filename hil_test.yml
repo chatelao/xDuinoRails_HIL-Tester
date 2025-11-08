@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -20,20 +20,13 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib python3
 
-    - name: Get Pico SDK
-      run: |
-        git clone https://github.com/raspberrypi/pico-sdk.git ../pico-sdk
-        git -C ../pico-sdk submodule update --init
-
     - name: Build firmware
       run: |
-        mkdir build
-        cd build
-        cmake ..
-        make
+        cmake -B build -S .
+        make -C build
 
     - name: Upload firmware artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pico-test-firmware
         path: build/test/pico_test.elf
@@ -43,10 +36,10 @@ jobs:
     runs-on: hil-tester
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Download firmware artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: pico-test-firmware
         path: firmware
@@ -57,4 +50,4 @@ jobs:
 
     - name: Run HIL test
       run: |
-        python3 script/run_hil_test.py --firmware firmware/pico_test.elf
+        python3 script/run_hil_test.py --firmware firmware/pico_test.elf --skip-build
