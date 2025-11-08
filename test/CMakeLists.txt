@@ -22,3 +22,5 @@ pico_enable_stdio_uart(pico_test 1)
 
 # Generate the .uf2 file for easy flashing
 pico_add_extra_outputs(pico_test)
+
+add_subdirectory(sut/pico/blinky)

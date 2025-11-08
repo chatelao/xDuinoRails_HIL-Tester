@@ -6,12 +6,18 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Set the path to the Pico SDK
 # This will likely need to be adjusted on the runner
-set(PICO_SDK_PATH "../../pico-sdk")
+set(PICO_SDK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/pico-sdk")
 
 # Include the Pico SDK
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
 project(hil_tester C CXX ASM)
+
+# Set the board to Raspberry Pi Pico W for CYW43 wireless/LED driver support
+set(PICO_BOARD pico_w)
+
+# Initialize the Pico SDK
+pico_sdk_init()
 
 # Add the test directory
 add_subdirectory(test)
