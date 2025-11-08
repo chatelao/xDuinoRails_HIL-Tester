@@ -1,64 +1,90 @@
-import argparse
-import subprocess
-import sys
 import serial
+import subprocess
 import time
+import shutil
 
-def flash_firmware(firmware_path):
-    """Flashes the firmware to the Pico using OpenOCD."""
-    print(f"Flashing firmware: {firmware_path}")
+# --- Configuration ---
+FIRMWARE_DIR = "build/test/sut/pico/blinky"
+FIRMWARE_ELF = f"{FIRMWARE_DIR}/blinky.elf"
+PICO_SERIAL_PORT = "/dev/ttyACM0"  # Adjust if your Pico uses a different port
+BAUD_RATE = 115200
+TIMEOUT = 10  # Seconds
+EXPECTED_TOGGLES = 20
+
+def build_firmware():
+    """Builds the SUT firmware using CMake and Make."""
+    print("--- Building SUT firmware ---")
     try:
-        subprocess.run(
-            ["openocd", "-f", "cfg/pico1.cfg", "-c", f"program {firmware_path} verify reset exit"],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        print("Firmware flashed successfully.")
+        # Clean the build directory to ensure a fresh build
+        if shutil.os.path.exists("build"):
+            shutil.rmtree("build")
+
+        subprocess.run(["cmake", "-B", "build", "-S", "."], check=True)
+        subprocess.run(["make", "-C", "build"], check=True)
+        print("--- Build successful ---")
         return True
     except subprocess.CalledProcessError as e:
-        print("Error flashing firmware:")
-        print(e.stdout)
-        print(e.stderr)
+        print(f"Error building firmware: {e}")
         return False
 
-def run_tests(serial_port):
-    """Monitors the serial port for Unity test results."""
-    print(f"Monitoring serial port: {serial_port}")
+def flash_firmware():
+    """Flashes the firmware to the Pico using OpenOCD."""
+    print("--- Flashing firmware ---")
     try:
-        with serial.Serial(serial_port, 115200, timeout=10) as ser:
-            output = ser.read_until(b"UNITY_END").decode("utf-8")
-            print("--- Test Output ---")
-            print(output)
-            print("-------------------")
+        subprocess.run(
+            [
+                "openocd",
+                "-f",
+                "interface/raspberrypi-swd.cfg",
+                "-f",
+                "target/rp2040.cfg",
+                "-c",
+                f"program {FIRMWARE_ELF} verify reset exit",
+            ],
+            check=True,
+        )
+        print("--- Flashing successful ---")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error flashing firmware: {e}")
+        return False
+    except FileNotFoundError:
+        print("Error: openocd not found. Is it installed and in your PATH?")
+        return False
 
-            if "FAIL" in output or "IGNORE" in output:
-                print("Tests failed or were ignored.")
-                return False
-            elif "OK" in output:
-                print("All tests passed.")
-                return True
-            else:
-                print("Could not determine test result.")
-                return False
+
+def verify_blinking():
+    """Verifies the blinking by listening for UART messages."""
+    print("--- Verifying blinking ---")
+    toggle_count = 0
+    try:
+        with serial.Serial(PICO_SERIAL_PORT, BAUD_RATE, timeout=TIMEOUT) as ser:
+            start_time = time.time()
+            while time.time() - start_time < TIMEOUT:
+                line = ser.readline().decode("utf-8").strip()
+                if line == "LED toggled":
+                    toggle_count += 1
+                    print(f"Received toggle message {toggle_count}/{EXPECTED_TOGGLES}")
+                    if toggle_count == EXPECTED_TOGGLES:
+                        print("--- Verification successful ---")
+                        return True
     except serial.SerialException as e:
         print(f"Error opening or reading from serial port: {e}")
         return False
 
+    print(f"Verification failed. Received {toggle_count}/{EXPECTED_TOGGLES} messages.")
+    return False
+
 def main():
-    parser = argparse.ArgumentParser(description="Run HIL tests on a Raspberry Pi Pico.")
-    parser.add_argument("--firmware", required=True, help="Path to the firmware .elf file.")
-    parser.add_argument("--port", default="/dev/ttyACM0", help="Serial port of the Pico.")
-    args = parser.parse_args()
+    if not build_firmware():
+        exit(1)
+    if not flash_firmware():
+        exit(1)
+    if not verify_blinking():
+        exit(1)
 
-    if not flash_firmware(args.firmware):
-        sys.exit(1)
-
-    # Give the device a moment to reset and start up
-    time.sleep(2)
-
-    if not run_tests(args.port):
-        sys.exit(1)
+    print("--- HIL test completed successfully! ---")
+    exit(0)
 
 if __name__ == "__main__":
     main()
