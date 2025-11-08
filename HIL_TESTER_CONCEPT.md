@@ -50,9 +50,32 @@ The following diagram illustrates the high-level architecture:
 
 ```
 
-## 2. Raspberry Pi 3 Software Stack
+## 2. Host Setup
 
-This section details the recommended software to be installed on the Raspberry Pi 3 to function as the host controller.
+This section provides instructions for setting up the Raspberry Pi 3 host controller using the automated setup script.
+
+### 2.1. Initial Setup
+
+1.  **Install the OS:** Start with a fresh installation of **Raspberry Pi OS Lite (64-bit)**.
+2.  **Clone the Repository:** Clone your HIL tester repository onto the Raspberry Pi.
+    ```bash
+    git clone <your-repository-url>
+    cd <your-repository-name>
+    ```
+3.  **Run the Setup Script:** The `setup_rpi.sh` script automates the installation of all necessary software and the configuration of the GitHub Actions runner.
+
+    Make the script executable and run it with `sudo`:
+    ```bash
+    chmod +x script/setup_rpi.sh
+    sudo ./script/setup_rpi.sh
+    ```
+4.  **Follow the Prompts:** The script will prompt you to enter your GitHub repository URL and a registration token for the self-hosted runner. You can generate a new token by navigating to your repository's settings under `Actions > Runners > New self-hosted runner`.
+
+Once the script is complete, the Raspberry Pi will be fully configured to act as a HIL tester host.
+
+## 3. Raspberry Pi 3 Software Stack
+
+This section details the software installed by the setup script on the Raspberry Pi 3 to function as the host controller.
 
 ### 2.1. Operating System
 
@@ -88,7 +111,7 @@ This section details the recommended software to be installed on the Raspberry P
     *   The "verifying" SUT (e.g., a Pico) will be programmed to run its tests and then serialize the results into a simple format (like JSON or a custom delimited string) and send it over its UART TX pin to the Raspberry Pi 3's RX pin.
     *   The Python orchestrator will listen on the serial port for this data to determine the outcome of the test.
 
-## 3. Automated Test Workflow
+## 4. Automated Test Workflow
 
 This section describes the end-to-end workflow for a single, automated test run.
 
@@ -124,7 +147,7 @@ This section describes the end-to-end workflow for a single, automated test run.
 
 10. **Job Completion:** The GitHub Actions runner reports the job's success or failure based on the script's exit code, making the result visible in the GitHub UI.
 
-## 4. GitHub Actions Integration
+## 5. GitHub Actions Integration
 
 To integrate the HIL tester into a CI/CD pipeline, the Raspberry Pi 3 will be configured as a self-hosted GitHub Actions runner.
 
@@ -184,7 +207,7 @@ jobs:
           --receiver-fw build/uart_receiver.elf
 ```
 
-## 5. Hardware Connections
+## 6. Hardware Connections
 
 ![Raspberry Pi GPIO Header](https://www.pi4j.com/1.2/images/p1header.png)
 
