@@ -4,6 +4,3 @@ bin/
 *.elf
 *.hex
 *.uf2
-
-# Pico SDK
-pico-sdk/
