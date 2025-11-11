@@ -4,12 +4,13 @@
 # HIL Tester Raspberry Pi Setup Script
 #
 # This script automates the setup of a Raspberry Pi as a HIL (Hardware-in-the-Loop)
-# host controller. It installs all necessary software, including OpenOCD and the
-# GitHub Actions self-hosted runner.
+# host controller. It installs all necessary software, including OpenOCD, the ARM
+# cross-compiler, and the GitHub Actions self-hosted runner.
 #
 # Usage:
 # 1. Make the script executable: chmod +x setup_rpi.sh
-# 2. Run with sudo: ./setup_rpi.sh
+# 2. Run with sudo and provide the GitHub repository URL and runner token as arguments:
+#    sudo ./setup_rpi.sh https://github.com/your-user/your-repo YOUR_RUNNER_TOKEN
 # =====================================================================================
 
 # --- Sanity Checks and Initialization ---
@@ -22,6 +23,17 @@ if [ "$(id -u)" -ne 0 ]; then
   echo "This script must be run as root. Please use sudo." >&2
   exit 1
 fi
+
+# Check for required arguments
+if [ "$#" -ne 2 ]; then
+    echo "Usage: sudo $0 <repository_url> <runner_token>" >&2
+    echo "Example: sudo $0 https://github.com/user/repo ABCDEFGHIJKLMNOPQRSTUVWXYZ123456" >&2
+    exit 1
+fi
+
+# Assign arguments to variables for clarity
+REPO_URL=$1
+RUNNER_TOKEN=$2
 
 echo "--- HIL Tester Raspberry Pi Setup Started ---"
 
@@ -44,7 +56,8 @@ apt-get install -y \
   python3-pip \
   openocd \
   curl \
-  jq
+  jq \
+  gcc-arm-none-eabi
 
 # --- Python Package Installation ---
 
@@ -108,16 +121,7 @@ echo "[5/5] Configuring runner and installing systemd service..."
 if [ -f ".runner" ]; then
     echo "Runner is already configured. Skipping configuration."
 else
-    # Prompt for configuration details
-    read -p "Enter the GitHub repository URL (e.g., https://github.com/user/repo): " REPO_URL
-    read -p "Enter the self-hosted runner registration token: " RUNNER_TOKEN
-
-    if [ -z "$REPO_URL" ] || [ -z "$RUNNER_TOKEN" ]; then
-        echo "Repository URL and token are required. Exiting." >&2
-        exit 1
-    fi
-
-    echo "Configuring the runner..."
+    echo "Configuring the runner for repository: ${REPO_URL}"
     ./config.sh --url "${REPO_URL}" --token "${RUNNER_TOKEN}" --unattended --replace
 fi
 
