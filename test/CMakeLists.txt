@@ -24,3 +24,4 @@ pico_enable_stdio_uart(pico_test 1)
 pico_add_extra_outputs(pico_test)
 
 add_subdirectory(sut/pico/blinky)
+add_subdirectory(pico_pwm_generator)
