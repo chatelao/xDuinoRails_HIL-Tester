@@ -4,6 +4,11 @@ bin/
 *.elf
 *.hex
 *.uf2
+CMakeCache.txt
+_deps/
+CMakeFiles/
+cmake_install.cmake
+Makefile
 
 # Pico SDK
 pico-sdk/
